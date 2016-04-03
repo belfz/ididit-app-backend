@@ -20,8 +20,17 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use('/api', expressJwt({secret: secret}));
 
-app.get('/api/restricted', function (req, res) {  
-  User.findOne({email: req.user.email}, 'email achievements')
+app.get('/api/profile', function (req, res) {  
+  User.findOne({email: req.user.email}, 'email')
+    .then(profile => {
+        res.json(profile).end();
+    }).catch(err => {
+        res.status(500).end();
+    });
+});
+
+app.get('/api/achievements', function (req, res) {  
+  User.findOne({email: req.user.email}, 'achievements')
     .then(profile => {
         res.json(profile).end();
     }).catch(err => {

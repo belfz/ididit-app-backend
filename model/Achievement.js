@@ -8,6 +8,10 @@ const AchievementSchema = mongoose.Schema({
     content: {
         type: String,
         require: [true, 'content is required']
+    },
+    done: {
+        type: Boolean,
+        require: [true, 'done status is required']
     }
 });
 

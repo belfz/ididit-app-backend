@@ -47,7 +47,8 @@ app.post('/auth/register', function (req, res) {
         achievements: [
             {
                 title: 'First achievement',
-                content: 'You just registered!'
+                content: 'You just registered!',
+                done: true
             }
         ]
     });
