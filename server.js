@@ -8,6 +8,8 @@ const jwt = require('jsonwebtoken');
 const cors = require('cors');
 const app = express();
 
+const utils = require('./utils/utils');
+
 const secret = 's3cret1!@#$%asdf';
 
 const mongoose = require('mongoose');
@@ -37,6 +39,20 @@ app.get('/api/achievements', function (req, res) {
         res.status(500).end();
     });
 });
+
+app.put('/api/achievements/:id', function (req, res) {
+  User.findOne({email: req.user.email}, 'achievements')
+    .then(profile => {
+        Object.assign(profile.achievements.id(req.params.id), req.body);
+        return profile.save();
+    })
+    .then(profile => {
+        res.json(profile.achievements.id(req.params.id)).end();
+    })
+    .catch(err => {
+        res.status(500).end();
+    });
+})
 
 /*
  * Server
