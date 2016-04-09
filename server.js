@@ -52,7 +52,35 @@ app.put('/api/achievements/:id', function (req, res) {
     .catch(err => {
         res.status(500).end();
     });
-})
+});
+
+app.post('/api/achievements/', function (req, res) {
+  User.findOne({email: req.user.email}, 'achievements')
+    .then(profile => {
+       profile.achievements.push(req.body);
+       return profile.save(); 
+    })
+    .then(profile => {
+        res.json(profile.achievements[profile.achievements.length-1]).end();
+    })
+    .catch(err => {
+        res.status(500).end();
+    });
+});
+
+app.delete('/api/achievements/:id', function (req, res) {
+  User.findOne({email: req.user.email}, 'achievements')
+    .then(profile => {
+       profile.achievements.id(req.params.id).remove();
+       return profile.save(); 
+    })
+    .then(() => {
+        res.status(200).end();
+    })
+    .catch(err => {
+        res.status(500).end();
+    });  
+});
 
 /*
  * Server
