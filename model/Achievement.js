@@ -3,15 +3,19 @@ const mongoose = require('mongoose');
 const AchievementSchema = mongoose.Schema({
     title: {
         type: String,
-        required: [true, 'title is required']
+        required: [true, 'title is required'],
+        minlength: 1,
+        maxlength: 125
     },
     content: {
         type: String,
-        require: [true, 'content is required']
+        required: [true, 'content is required'],
+        minlength: 1,
+        maxlength: 1000
     },
     done: {
         type: Boolean,
-        require: [true, 'done status is required']
+        required: [true, 'done status is required']
     }
 });
 
