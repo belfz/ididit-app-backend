@@ -21,23 +21,46 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
+function getAuthSuccessResponseBody (profile, addRefreshToken) {
+  //for refresh tokens: create the refresh tokens the same way as regular api tokens, but also encode the audience 
+  //that says, that this is the refresh token or regular api token (regular api tokens can be used for api interaction)
+  return {
+    token: jwt.sign(profile, secret, {expiresIn: 30, audience: 'api'}), //5mins
+    refreshToken: addRefreshToken ? jwt.sign(profile, secret, {audience: 'refresh_token'}) : undefined,
+    profile
+  };
+}
+
 app.post('/auth/login', function (req, res) {  
-  const user = User.findOne({email: req.body.email}, 'email password')
+  User.findOne({email: req.body.email}, 'email password')
     .then((profile) => {
-        console.log('profile:', profile);
       if (profile.password === utils.encryptPassword(req.body.password)) {
-          profile = {email: profile.email};
-          const token = jwt.sign(profile, secret, {expiresIn: 300}); //5mins
-          return res.json({token: token, profile});  
+        return res.json(getAuthSuccessResponseBody({email: profile.email}, req.body.refreshToken));  
       }
-      throw new Error();
+      throw new Error('Wrong email or password');
     }).catch((err) => {
-        return res.send(401, 'Wrong user or password');
+      return res.send(401, err.message);
     });
 });
 
+//TODO MUST invalidate the previous refresh tokens!
+app.post('/auth/refresh', function (req, res) {
+  const refreshToken = req.body.refreshToken;
+  const tokenDecoded = jwt.verify(refreshToken, secret);
+  if (tokenDecoded.aud === 'refresh_token') {
+    return User.findOne({email: tokenDecoded.email}, 'email')
+      .then((profile) => {
+        return res.json(getAuthSuccessResponseBody({email: tokenDecoded.email}, refreshToken));  
+      })
+      .catch((err) => {
+        return res.send(401, err.message);
+      });
+  }
+  return res.send(401, 'Invalid token type!');
+});
+
 app.post('/auth/availability', function (req, res) {
-    
+    //TODO implement in th future
 });
 
 app.post('/auth/register', function (req, res) {
@@ -54,7 +77,7 @@ app.post('/auth/register', function (req, res) {
     });
     user.save()
         .then((profile) => {
-            return res.json({email: profile.email});
+            return res.json(getAuthSuccessResponseBody({email: profile.email}, req.body.refreshToken));
         })
         .catch((err) => {
             console.log('err:', err);

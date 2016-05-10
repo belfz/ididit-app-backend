@@ -22,6 +22,11 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use('/api', expressJwt({secret: secret}));
 
+app.all('/api/*', function (req, res, next) {
+  // check if the provided token is a valid api token (not the refresh token)
+  next();
+});
+
 app.get('/api/profile', function (req, res) {  
   User.findOne({email: req.user.email}, 'email')
     .then(profile => {
