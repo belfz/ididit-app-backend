@@ -45,6 +45,16 @@ app.get('/api/achievements', function (req, res) {
     });
 });
 
+app.get('/api/achievements/:id', function (req, res) {
+  User.findOne({email: req.user.email}, 'achievements')
+    .then(profile => {
+        const achievement = profile.achievements.id(req.params.id);
+        return achievement ? res.json({achievement}) : res.status(404).end();
+    }).catch(err => {
+        res.status(500).end();
+    });  
+});
+
 app.put('/api/achievements/:id', function (req, res) {
   User.findOne({email: req.user.email}, 'achievements')
     .then(profile => {
